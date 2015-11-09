@@ -54,13 +54,14 @@ class RequestEncoder(JSONEncoder):
 
 class Openscoring:
 
-	def __init__(self, baseUrl = "http://localhost:8080/openscoring"):
+	def __init__(self, baseUrl = "http://localhost:8080/openscoring", auth = None):
 		self.baseUrl = baseUrl
+		self.auth = auth
 
 	def deploy(self, id, pmml):
 		stream = open(pmml, "rb")
 		try :
-			response = requests.put(self.baseUrl + "/model/" + id, headers = {"content-type" : "application/xml"}, data = stream)
+			response = requests.put(self.baseUrl + "/model/" + id, auth = self.auth, headers = {"content-type" : "application/xml"}, data = stream)
 			modelResponse = ModelResponse(**json.loads(response.content))
 			return modelResponse.ensureSuccess()
 		finally:
@@ -71,7 +72,7 @@ class Openscoring:
 			evaluationRequest = payload
 		else:
 			evaluationRequest = EvaluationRequest(None, payload)
-		response = requests.post(self.baseUrl + "/model/" + id, headers = {"content-type" : "application/json"}, data = json.dumps(evaluationRequest, cls = RequestEncoder))
+		response = requests.post(self.baseUrl + "/model/" + id, auth = self.auth, headers = {"content-type" : "application/json"}, data = json.dumps(evaluationRequest, cls = RequestEncoder))
 		evaluationResponse = EvaluationResponse(**json.loads(response.content))
 		evaluationResponse.ensureSuccess()
 		if(isinstance(payload, EvaluationRequest)):
@@ -80,6 +81,6 @@ class Openscoring:
 			return evaluationResponse.result
 
 	def undeploy(self, id):
-		response = requests.delete(self.baseUrl + "/model/" + id)
+		response = requests.delete(self.baseUrl + "/model/" + id, auth = self.auth)
 		simpleResponse = SimpleResponse(**json.loads(response.content))
 		return simpleResponse.ensureSuccess()
