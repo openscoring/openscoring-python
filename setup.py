@@ -8,5 +8,8 @@ setup(
 	author_email = "villu.ruusmann@gmail.com",
 	url = "https://github.com/jpmml/openscoring-python",
 	license = "GNU Affero General Public License (AGPL) version 3.0",
-	packages = ["openscoring"]
+	packages = ["openscoring"],
+	install_requires = [
+		"requests"
+	]
 )

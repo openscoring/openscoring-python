@@ -5,14 +5,15 @@ Python client library for the [Openscoring REST web service] (https://github.com
 
 # Installation #
 
-Enter the project root directory, and build and install using Python Distribution Utilities (“Distutils”):
+Installing the latest version from GitHub:
+
 ```
-python setup.py install --user
+pip install --user --upgrade git+https://github.com/jpmml/openscoring-python.git
 ```
 
 # Usage #
 
-Create an `openscoring.Openscoring` object that holds the base URL of the REST web service:
+Create an `openscoring.Openscoring` object:
 
 ```python
 import openscoring
@@ -40,7 +41,7 @@ result = os.evaluate("Iris", arguments)
 print(result)
 ```
 
-The same, but representing the data record as an `openscoring.EvaluationRequest` object:
+The same, but wrapping the data record into an `openscoring.EvaluationRequest` object for request identification purposes:
 
 ```python
 evaluationRequest = openscoring.EvaluationRequest("record-001", arguments)
@@ -52,6 +53,14 @@ Undeploy the `Iris` model:
 
 ```python
 os.undeploy("Iris")
+```
+
+# Uninstallation #
+
+Uninstalling:
+
+```
+pip uninstall openscoring
 ```
 
 # License #
