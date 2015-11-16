@@ -29,7 +29,7 @@ os.deploy("Iris", "DecisionTreeIris.pmml")
 
 Evaluate the `Iris` model with a data record:
 
-```
+```python
 arguments = {
 	"Sepal_Length" : 5.1,
 	"Sepal_Width" : 3.5,
@@ -55,7 +55,7 @@ Undeploy the `Iris` model:
 os.undeploy("Iris")
 ```
 
-# Uninstallation #
+# De-installation #
 
 Uninstalling:
 
