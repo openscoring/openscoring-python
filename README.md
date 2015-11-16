@@ -24,7 +24,10 @@ os = openscoring.Openscoring("http://localhost:8080/openscoring")
 Deploy a PMML document `DecisionTreeIris.pmml` as an `Iris` model:
 
 ```python
-os.deploy("Iris", "DecisionTreeIris.pmml")
+# A dictionary of user-specified parameters
+kwargs = {"auth" : ("admin", "adminadmin")}
+
+os.deploy("Iris", "DecisionTreeIris.pmml", **kwargs)
 ```
 
 Evaluate the `Iris` model with a data record:
@@ -52,7 +55,7 @@ print(evaluationResponse.result)
 Undeploy the `Iris` model:
 
 ```python
-os.undeploy("Iris")
+os.undeploy("Iris", **kwargs)
 ```
 
 # De-installation #
