@@ -4,6 +4,7 @@ from json import JSONDecoder, JSONEncoder
 
 import json
 import requests
+import shutil
 
 __copyright__ = "Copyright (c) 2015 Villu Ruusmann"
 __license__ = "GNU Affero General Public License (AGPL) version 3.0"
@@ -75,7 +76,7 @@ class Openscoring:
 
 	def deploy(self, id, pmml, **kwargs):
 		stream = open(pmml, "rb")
-		try :
+		try:
 			kwargs = Openscoring._merge(kwargs, data = stream, json = None, headers = {"content-type" : "application/xml"})
 			#print(kwargs)
 			response = requests.put(self.baseUrl + "/model/" + id, **kwargs)
@@ -98,6 +99,30 @@ class Openscoring:
 			return evaluationResponse
 		else:
 			return evaluationResponse.result
+
+	def evaluateCsv(self, id, inCsv, outCsv, **kwargs):
+		inStream = open(inCsv, "r")
+		try:
+			kwargs = Openscoring._merge(kwargs, data = inStream, json = None, headers = {"content-type" : "text/plain"}, stream = True)
+			#print(kwargs)
+			response = requests.post(self.baseUrl + "/model/" + id + "/csv", **kwargs)
+			try:
+				if("content-encoding" in response.headers):
+					response.raw.decode_content = True
+
+				if(("content-type" in response.headers) and (response.headers["content-type"] == "application/json")):
+					simpleResponse = SimpleResponse(**json.loads(response.content))
+					return simpleResponse.ensureSuccess()
+
+				outStream = open(outCsv, "w")
+				try:
+					shutil.copyfileobj(response.raw, outStream, 1024)
+				finally:
+					outStream.close()
+			finally:
+				response.close()
+		finally:
+			inStream.close()
 
 	def undeploy(self, id, **kwargs):
 		response = requests.delete(self.baseUrl + "/model/" + id, **kwargs)
