@@ -8,7 +8,7 @@ import shutil
 
 __copyright__ = "Copyright (c) 2015 Villu Ruusmann"
 __license__ = "GNU Affero General Public License (AGPL) version 3.0"
-__version__ = "0.3.0"
+__version__ = "0.3.1"
 
 class SimpleRequest(object):
 	pass
@@ -81,7 +81,7 @@ class Openscoring:
 			kwargs = Openscoring._merge(kwargs, data = stream, json = None, headers = {"content-type" : "application/xml"})
 			#print(kwargs)
 			response = requests.put(self.baseUrl + "/model/" + id, **kwargs)
-			modelResponse = ModelResponse(**json.loads(response.content))
+			modelResponse = ModelResponse(**json.loads(response.text))
 			return modelResponse.ensureSuccess()
 		finally:
 			stream.close()
@@ -94,7 +94,7 @@ class Openscoring:
 		kwargs = Openscoring._merge(kwargs, data = json.dumps(evaluationRequest, cls = RequestEncoder), json = None, headers = {"content-type" : "application/json"})
 		#print(kwargs)
 		response = requests.post(self.baseUrl + "/model/" + id, **kwargs)
-		evaluationResponse = EvaluationResponse(**json.loads(response.content))
+		evaluationResponse = EvaluationResponse(**json.loads(response.text))
 		evaluationResponse.ensureSuccess()
 		if(isinstance(payload, EvaluationRequest)):
 			return evaluationResponse
@@ -102,7 +102,7 @@ class Openscoring:
 			return evaluationResponse.result
 
 	def evaluateCsv(self, id, inCsv, outCsv, **kwargs):
-		inStream = open(inCsv, "r")
+		inStream = open(inCsv, "rb")
 		try:
 			kwargs = Openscoring._merge(kwargs, data = inStream, json = None, headers = {"content-type" : "text/plain"}, stream = True)
 			#print(kwargs)
@@ -112,10 +112,10 @@ class Openscoring:
 					response.raw.decode_content = True
 
 				if(("content-type" in response.headers) and (response.headers["content-type"] == "application/json")):
-					simpleResponse = SimpleResponse(**json.loads(response.content))
+					simpleResponse = SimpleResponse(**json.loads(response.text))
 					return simpleResponse.ensureSuccess()
 
-				outStream = open(outCsv, "w")
+				outStream = open(outCsv, "wb")
 				try:
 					shutil.copyfileobj(response.raw, outStream, 1024)
 				finally:
@@ -127,5 +127,5 @@ class Openscoring:
 
 	def undeploy(self, id, **kwargs):
 		response = requests.delete(self.baseUrl + "/model/" + id, **kwargs)
-		simpleResponse = SimpleResponse(**json.loads(response.content))
+		simpleResponse = SimpleResponse(**json.loads(response.text))
 		return simpleResponse.ensureSuccess()
