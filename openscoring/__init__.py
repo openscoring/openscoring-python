@@ -8,6 +8,7 @@ import shutil
 
 __copyright__ = "Copyright (c) 2015 Villu Ruusmann"
 __license__ = "GNU Affero General Public License (AGPL) version 3.0"
+__version__ = "0.3.0"
 
 class SimpleRequest(object):
 	pass
