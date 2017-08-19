@@ -1,7 +1,7 @@
 Openscoring-Python
 ==================
 
-Python client library for the [Openscoring REST web service] (https://github.com/jpmml/openscoring).
+Python client library for the [Openscoring REST web service](https://github.com/jpmml/openscoring).
 
 # Prerequisites #
 
@@ -78,8 +78,8 @@ pip uninstall openscoring
 
 # License #
 
-Openscoring-Python is licensed under the [GNU Affero General Public License (AGPL) version 3.0] (http://www.gnu.org/licenses/agpl-3.0.html). Other licenses are available on request.
+Openscoring-Python is licensed under the [GNU Affero General Public License (AGPL) version 3.0](http://www.gnu.org/licenses/agpl-3.0.html). Other licenses are available on request.
 
 # Additional information #
 
-Please contact [info@openscoring.io] (mailto:info@openscoring.io)
+Please contact [info@openscoring.io](mailto:info@openscoring.io)
