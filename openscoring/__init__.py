@@ -2,13 +2,19 @@
 
 from json import JSONDecoder, JSONEncoder
 
+try:
+    from StringIO import StringIO
+except ImportError:
+    from io import StringIO
+
 import json
+import pandas
 import requests
 import shutil
 
 __copyright__ = "Copyright (c) 2015 Villu Ruusmann"
 __license__ = "GNU Affero General Public License (AGPL) version 3.0"
-__version__ = "0.3.1"
+__version__ = "0.3.2"
 
 class SimpleRequest(object):
 	pass
@@ -124,6 +130,24 @@ class Openscoring:
 				response.close()
 		finally:
 			inStream.close()
+
+	def evaluateDataFrame(self, id, df, **kwargs):
+		inCsv = df.to_csv(None, sep = "\t", header = True, index = False, encoding = "UTF-8")
+		kwargs = Openscoring._merge(kwargs, data = inCsv, json = None, headers = {"content-type" : "text/plain"}, params = {"delimiterChar" : "\t", "quoteChar" : "\""}, stream = False)
+		#print(kwargs)
+		response = requests.post(self.baseUrl + "/model/" + id + "/csv", **kwargs)
+		try:
+			if("content-encoding" in response.headers):
+				response.raw.decode_content = True
+
+			if(("content-type" in response.headers) and (response.headers["content-type"] == "application/json")):
+				simpleResponse = SimpleResponse(**json.loads(response.text))
+				return simpleResponse.ensureSuccess()
+
+			outCsv = response.text
+			return pandas.read_csv(StringIO(outCsv), sep = "\t", encoding = "UTF-8")
+		finally:
+			response.close()
 
 	def undeploy(self, id, **kwargs):
 		response = requests.delete(self.baseUrl + "/model/" + id, **kwargs)

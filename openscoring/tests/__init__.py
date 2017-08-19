@@ -1,15 +1,20 @@
 from unittest import TestCase
 
 from openscoring import EvaluationRequest, Openscoring
+from pandas import DataFrame
 
 import os
+import pandas
+import tempfile
 
 class TestOpenscoring(TestCase):
 
 	def testReadme(self):
 		openscoring = Openscoring()
 
-		modelResponse = openscoring.deploy("Iris", os.path.join(os.path.dirname(__file__), "resources", "DecisionTreeIris.pmml"))
+		pmml = os.path.join(os.path.dirname(__file__), "resources", "DecisionTreeIris.pmml")
+
+		modelResponse = openscoring.deploy("Iris", pmml)
 		self.assertEqual("Iris", modelResponse.id)
 
 		arguments = {
@@ -22,13 +27,27 @@ class TestOpenscoring(TestCase):
 		self.assertEqual({"Species" : "setosa", "Probability_setosa" : 1.0, "Probability_versicolor" : 0.0, "Probability_virginica" : 0.0, "Node_Id" : "2"}, result)
 		evaluationRequest = EvaluationRequest("record-001", arguments)
 		evaluationResponse = openscoring.evaluate("Iris", evaluationRequest)
-		self.assertEqual("record-001", evaluationResponse.id)
-		self.assertEqual(result, evaluationResponse.result)
+		self.assertEqual(evaluationRequest.id, evaluationResponse.id)
+		self.assertEqual("setosa", evaluationResponse.result["Species"])
+
+		inCsv = os.path.join(os.path.dirname(__file__), "resources", "input.csv")
+		outCsv = os.path.join(tempfile.gettempdir(), "output.csv")
+
+		self.assertFalse(os.path.isfile(outCsv))
+		openscoring.evaluateCsv("Iris", inCsv, outCsv)
+		self.assertTrue(os.path.isfile(outCsv) and os.path.getsize(outCsv) > 10)
+
+		os.remove(outCsv)
+
+		arguments = pandas.read_csv(inCsv, sep = ",")
+		result = openscoring.evaluateDataFrame("Iris", arguments)
+		self.assertEqual(arguments["Id"].tolist(), result["Id"].tolist())
+		self.assertEqual(["setosa", "versicolor", "virginica"], result["Species"].tolist())
 
 		openscoring.undeploy("Iris")
 
 		with self.assertRaises(Exception) as context:
-			openscoring.evaluate("Iris", evaluationRequest)
+			openscoring.evaluateDataFrame("Iris", arguments)
 		self.assertEqual("Model \"Iris\" not found", str(context.exception))
 
 class TestDictMerge(TestCase):
