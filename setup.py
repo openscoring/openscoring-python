@@ -1,6 +1,6 @@
 from distutils.core import setup
 
-from openscoring import __license__, __version__
+exec(open("openscoring/metadata.py").read())
 
 setup(
 	name = "openscoring",
@@ -10,7 +10,9 @@ setup(
 	author_email = "villu.ruusmann@gmail.com",
 	url = "https://github.com/openscoring/openscoring-python",
 	license = __license__,
-	packages = ["openscoring"],
+	packages = [
+		"openscoring"
+	],
 	install_requires = [
 		"requests"
 	]

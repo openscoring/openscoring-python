@@ -1,5 +1,3 @@
-#!/usr/bin/env python
-
 from json import JSONDecoder, JSONEncoder
 
 try:
@@ -12,9 +10,7 @@ import pandas
 import requests
 import shutil
 
-__copyright__ = "Copyright (c) 2015 Villu Ruusmann"
-__license__ = "GNU Affero General Public License (AGPL) version 3.0"
-__version__ = "0.3.2"
+from .metadata import __copyright__, __license__, __version__
 
 class SimpleRequest(object):
 	pass
