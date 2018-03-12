@@ -1,11 +1,34 @@
-from unittest import TestCase
-
-from openscoring import EvaluationRequest, Openscoring
+from openscoring import _merge_dicts, EvaluationRequest, Openscoring
 from pandas import DataFrame
+from unittest import TestCase
 
 import os
 import pandas
 import tempfile
+
+class TestMergeDicts(TestCase):
+
+	def testMissingUserDict(self):
+		self.assertEqual({}, _merge_dicts(None))
+		self.assertEqual({"A" : 1}, _merge_dicts(None, A = 1))
+		self.assertEqual({"A" : {"one" : 1}}, _merge_dicts(None, A = {"one" : 1}))
+
+	def testMergeValue(self):
+		self.assertEqual({"A" : 1, "B" : 2, "C" : 3}, _merge_dicts({"A" : 1}, B = 2, C = 3))
+
+	def testMergeValueEqual(self):
+		self.assertEqual({"A" : 1}, _merge_dicts({"A" : 1}, A = 1))
+
+	def testMergeValueConflict(self):
+		with self.assertRaises(Exception):
+			_merge_dicts({"A" : 1}, A = "1")
+
+	def testMergeDict(self):
+		self.assertEqual({"A" : {"one" : 1, "two" : 2, "three" : 3}}, _merge_dicts({"A" : {"one" : 1}}, A = {"two" : 2, "three" : 3}))
+
+	def testMergeDictOverride(self):
+		self.assertEqual({"A" : {"one" : 1}}, _merge_dicts({"A" : {"one" : 1}}))
+		self.assertEqual({"A" : {"one" : "1"}}, _merge_dicts({"A" : {"one" : 1}}, A = {"one" : "1"}))
 
 class TestOpenscoring(TestCase):
 
@@ -49,27 +72,3 @@ class TestOpenscoring(TestCase):
 		with self.assertRaises(Exception) as context:
 			openscoring.evaluateDataFrame("Iris", arguments)
 		self.assertEqual("Model \"Iris\" not found", str(context.exception))
-
-class TestDictMerge(TestCase):
-
-	def testMissingUserDict(self):
-		self.assertEqual({}, Openscoring._merge(None))
-		self.assertEqual({"A" : 1}, Openscoring._merge(None, A = 1))
-		self.assertEqual({"A" : {"one" : 1}}, Openscoring._merge(None, A = {"one" : 1}))
-
-	def testMergeValue(self):
-		self.assertEqual({"A" : 1, "B" : 2, "C" : 3}, Openscoring._merge({"A" : 1}, B = 2, C = 3))
-
-	def testMergeValueEqual(self):
-		self.assertEqual({"A" : 1}, Openscoring._merge({"A" : 1}, A = 1))
-
-	def testMergeValueConflict(self):
-		with self.assertRaises(Exception):
-			Openscoring._merge({"A" : 1}, A = "1")
-
-	def testMergeDict(self):
-		self.assertEqual({"A" : {"one" : 1, "two" : 2, "three" : 3}}, Openscoring._merge({"A" : {"one" : 1}}, A = {"two" : 2, "three" : 3}))
-
-	def testMergeDictOverride(self):
-		self.assertEqual({"A" : {"one" : 1}}, Openscoring._merge({"A" : {"one" : 1}}))
-		self.assertEqual({"A" : {"one" : "1"}}, Openscoring._merge({"A" : {"one" : 1}}, A = {"one" : "1"}))
