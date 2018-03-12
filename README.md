@@ -17,12 +17,12 @@ pip install --user --upgrade git+https://github.com/jpmml/openscoring-python.git
 
 # Usage #
 
-Create an `openscoring.Openscoring` object:
+Create an `Openscoring` object:
 
 ```python
-import openscoring
+from openscoring import Openscoring
 
-os = openscoring.Openscoring("http://localhost:8080/openscoring")
+os = Openscoring("http://localhost:8080/openscoring")
 ```
 
 Deploy a PMML document `DecisionTreeIris.pmml` as an `Iris` model:
@@ -48,10 +48,12 @@ result = os.evaluate("Iris", arguments)
 print(result)
 ```
 
-The same, but wrapping the data record into an `openscoring.EvaluationRequest` object for request identification purposes:
+The same, but wrapping the data record into an `EvaluationRequest` object for request identification purposes:
 
 ```python
-evaluationRequest = openscoring.EvaluationRequest("record-001", arguments)
+from openscoring import EvaluationRequest
+
+evaluationRequest = EvaluationRequest("record-001", arguments)
 evaluationResponse = os.evaluate("Iris", evaluationRequest)
 print(evaluationResponse.result)
 ```
