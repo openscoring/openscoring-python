@@ -81,7 +81,7 @@ class Openscoring(object):
 	def _model_url(self, id):
 		return self.base_url + "/model/" + id
 
-	def deploy(self, id, file, **kwargs):
+	def deployFile(self, id, file, **kwargs):
 		with open(file, "rb") as instream:
 			kwargs = _merge_dicts(kwargs, data = instream, json = None, headers = {"content-type" : "application/xml"})
 			response = requests.put(self._model_url(id), **kwargs)
@@ -102,7 +102,21 @@ class Openscoring(object):
 		else:
 			return evaluationResponse.result
 
-	def evaluateCsv(self, id, infile, outfile, **kwargs): 
+	def evaluateCsv(self, id, df, **kwargs):
+		csv = df.to_csv(None, sep = "\t", header = True, index = False, encoding = "UTF-8")
+		kwargs = _merge_dicts(kwargs, data = csv, json = None, headers = {"content-type" : "text/plain"}, params = {"delimiterChar" : "\t", "quoteChar" : "\""}, stream = False)
+		response = requests.post(self._model_url(id) + "/csv", **kwargs)
+		try:
+			if "content-encoding" in response.headers:
+				response.raw.decode_content = True
+			if ("content-type" in response.headers) and (response.headers["content-type"] == "application/json"):
+				simpleResponse = SimpleResponse(**json.loads(response.text))
+				return simpleResponse.ensureSuccess()
+			return pandas.read_csv(StringIO(response.text), sep = "\t", encoding = "UTF-8")
+		finally:
+			response.close()
+
+	def evaluateCsvFile(self, id, infile, outfile, **kwargs): 
 		with open(infile, "rb") as instream:
 			kwargs = _merge_dicts(kwargs, data = instream, json = None, headers = {"content-type" : "text/plain"}, stream = True)
 			response = requests.post(self._model_url(id) + "/csv", **kwargs)
@@ -116,20 +130,6 @@ class Openscoring(object):
 					shutil.copyfileobj(response.raw, outstream, 1024)
 			finally:
 				response.close()
-
-	def evaluateDataFrame(self, id, df, **kwargs):
-		csv = df.to_csv(None, sep = "\t", header = True, index = False, encoding = "UTF-8")
-		kwargs = _merge_dicts(kwargs, data = csv, json = None, headers = {"content-type" : "text/plain"}, params = {"delimiterChar" : "\t", "quoteChar" : "\""}, stream = False)
-		response = requests.post(self._model_url(id) + "/csv", **kwargs)
-		try:
-			if "content-encoding" in response.headers:
-				response.raw.decode_content = True
-			if ("content-type" in response.headers) and (response.headers["content-type"] == "application/json"):
-				simpleResponse = SimpleResponse(**json.loads(response.text))
-				return simpleResponse.ensureSuccess()
-			return pandas.read_csv(StringIO(response.text), sep = "\t", encoding = "UTF-8")
-		finally:
-			response.close()
 
 	def undeploy(self, id, **kwargs):
 		response = requests.delete(self._model_url(id), **kwargs)

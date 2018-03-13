@@ -31,7 +31,7 @@ Deploy a PMML document `DecisionTreeIris.pmml` as an `Iris` model:
 # A dictionary of user-specified parameters
 kwargs = {"auth" : ("admin", "adminadmin")}
 
-os.deploy("Iris", "DecisionTreeIris.pmml", **kwargs)
+os.deployFile("Iris", "DecisionTreeIris.pmml", **kwargs)
 ```
 
 Evaluate the `Iris` model with a data record:
@@ -61,7 +61,7 @@ print(evaluationResponse.result)
 Evaluate the `Iris` model with data records from the `Iris.csv` CSV file, storing the results to the `Iris-results` CSV file:
 
 ```python
-os.evaluateCsv("Iris", "Iris.csv", "Iris-results.csv")
+os.evaluateCsvFile("Iris", "Iris.csv", "Iris-results.csv")
 ```
 
 Undeploy the `Iris` model:
