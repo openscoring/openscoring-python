@@ -81,12 +81,15 @@ class Openscoring(object):
 	def _model_url(self, id):
 		return self.base_url + "/model/" + id
 
+	def deploy(self, id, pmml, **kwargs):
+		kwargs = _merge_dicts(kwargs, data = pmml, json = None, headers = {"content-type" : "application/xml"})
+		response = requests.put(self._model_url(id), **kwargs)
+		modelResponse = ModelResponse(**json.loads(response.text))
+		return modelResponse.ensureSuccess()
+
 	def deployFile(self, id, file, **kwargs):
 		with open(file, "rb") as instream:
-			kwargs = _merge_dicts(kwargs, data = instream, json = None, headers = {"content-type" : "application/xml"})
-			response = requests.put(self._model_url(id), **kwargs)
-			modelResponse = ModelResponse(**json.loads(response.text))
-			return modelResponse.ensureSuccess()
+			return self.deploy(id, instream, **kwargs)
 
 	def evaluate(self, id, payload = {}, **kwargs):
 		if isinstance(payload, EvaluationRequest):

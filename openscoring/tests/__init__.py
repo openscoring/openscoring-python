@@ -37,6 +37,13 @@ class TestOpenscoring(TestCase):
 
 		pmml = os.path.join(os.path.dirname(__file__), "resources", "DecisionTreeIris.pmml")
 
+		with open(pmml, "rb") as instream:
+			pmmlBytes = instream.read()
+		self.assertTrue(isinstance(pmmlBytes, bytes))
+		self.assertEqual(4306, len(pmmlBytes))
+		modelResponse = openscoring.deploy("Iris", pmmlBytes)
+		self.assertEqual("Iris", modelResponse.id)
+
 		modelResponse = openscoring.deployFile("Iris", pmml)
 		self.assertEqual("Iris", modelResponse.id)
 
