@@ -1,7 +1,7 @@
 Openscoring-Python
 ==================
 
-Python client library for the [Openscoring REST web service](https://github.com/jpmml/openscoring).
+Python client library for the [Openscoring REST web service](https://github.com/openscoring/openscoring).
 
 # Prerequisites #
 
@@ -12,7 +12,7 @@ Python client library for the [Openscoring REST web service](https://github.com/
 Installing the latest version from GitHub:
 
 ```
-pip install --user --upgrade git+https://github.com/jpmml/openscoring-python.git
+pip install --user --upgrade git+https://github.com/openscoring/openscoring-python.git
 ```
 
 # Usage #
