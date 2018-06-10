@@ -1,7 +1,7 @@
 Openscoring-Python
 ==================
 
-Python client library for the [Openscoring REST web service](https://github.com/openscoring/openscoring).
+Python client library for the Openscoring REST web service.
 
 # Prerequisites #
 
@@ -9,24 +9,21 @@ Python client library for the [Openscoring REST web service](https://github.com/
 
 # Installation #
 
-Installing the latest version from GitHub:
-
+Install the latest version from GitHub:
 ```
 pip install --user --upgrade git+https://github.com/openscoring/openscoring-python.git
 ```
 
 # Usage #
 
-Create an `Openscoring` object:
-
+Creating an `Openscoring` object:
 ```python
 from openscoring import Openscoring
 
 os = Openscoring("http://localhost:8080/openscoring")
 ```
 
-Deploy a PMML document `DecisionTreeIris.pmml` as an `Iris` model:
-
+Deploying a PMML document `DecisionTreeIris.pmml` as an `Iris` model:
 ```python
 # A dictionary of user-specified parameters
 kwargs = {"auth" : ("admin", "adminadmin")}
@@ -34,8 +31,7 @@ kwargs = {"auth" : ("admin", "adminadmin")}
 os.deployFile("Iris", "DecisionTreeIris.pmml", **kwargs)
 ```
 
-Evaluate the `Iris` model with a data record:
-
+Evaluating the `Iris` model with a data record:
 ```python
 arguments = {
 	"Sepal_Length" : 5.1,
@@ -49,31 +45,28 @@ print(result)
 ```
 
 The same, but wrapping the data record into an `EvaluationRequest` object for request identification purposes:
-
 ```python
 from openscoring import EvaluationRequest
 
 evaluationRequest = EvaluationRequest("record-001", arguments)
+
 evaluationResponse = os.evaluate("Iris", evaluationRequest)
 print(evaluationResponse.result)
 ```
 
-Evaluate the `Iris` model with data records from the `Iris.csv` CSV file, storing the results to the `Iris-results` CSV file:
-
+Evaluating the `Iris` model with data records from the `Iris.csv` CSV file, storing the results to the `Iris-results` CSV file:
 ```python
 os.evaluateCsvFile("Iris", "Iris.csv", "Iris-results.csv")
 ```
 
-Undeploy the `Iris` model:
-
+Undeploying the `Iris` model:
 ```python
 os.undeploy("Iris", **kwargs)
 ```
 
 # De-installation #
 
-Uninstalling:
-
+Uninstall:
 ```
 pip uninstall openscoring
 ```
