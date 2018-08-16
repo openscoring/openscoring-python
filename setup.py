@@ -14,6 +14,7 @@ setup(
 		"openscoring"
 	],
 	install_requires = [
+		"pandas",
 		"requests"
 	]
 )
