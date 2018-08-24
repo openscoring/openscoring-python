@@ -21,6 +21,11 @@ class EvaluationRequest(SimpleRequest):
 		self.id = id
 		self.arguments = arguments
 
+class BatchEvaluationRequest(SimpleRequest):
+	def __init__(self, id = None, reqs = []):
+		self.id = id
+		self.requests = reqs
+
 class SimpleResponse(object):
 
 	def __init__(self, message = None):
@@ -37,6 +42,12 @@ class EvaluationResponse(SimpleResponse):
 		super(EvaluationResponse, self).__init__(message)
 		self.id = id
 		self.result = result
+
+class BatchEvaluationResponse(SimpleResponse):
+	def __init__(self, message = None, id = None, responses = []):
+		super(BatchEvaluationResponse, self).__init__(message)
+		self.id = id
+		self.responses = responses
 
 class ModelResponse(SimpleResponse):
 
@@ -113,6 +124,21 @@ class Openscoring(object):
 			return evaluationResponse
 		else:
 			return evaluationResponse.result
+
+	def evaluateBatch(self, id, payload = [], **kwargs):
+		if isinstance(payload, BatchEvaluationRequest):
+			evaluationRequest = payload
+		else:
+			reqs = [EvaluationRequest(None, p) for p in payload]
+			evaluationRequest = BatchEvaluationRequest(None, reqs)
+		kwargs = _merge_dicts(kwargs, data = json.dumps(evaluationRequest, cls = RequestEncoder), json = None, headers = {"content-type" : "application/json"})
+		response = self._check_response(requests.post(self._model_url(id) + '/batch', **kwargs))
+		evaluationResponse = BatchEvaluationResponse(**json.loads(response.text))
+		evaluationResponse.ensureSuccess()
+		if isinstance(payload, BatchEvaluationRequest):
+			return evaluationResponse
+		else:
+			return [EvaluationResponse(**res).result for res in evaluationResponse.responses]
 
 	def evaluateCsv(self, id, df, **kwargs):
 		csv = df.to_csv(None, sep = "\t", header = True, index = False, encoding = "UTF-8")
