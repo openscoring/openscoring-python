@@ -40,7 +40,7 @@ class TestOpenscoring(TestCase):
 		with open(pmml, "rb") as instream:
 			pmmlBytes = instream.read()
 		self.assertTrue(isinstance(pmmlBytes, bytes))
-		self.assertEqual(4306, len(pmmlBytes))
+		self.assertEqual(2919, len(pmmlBytes))
 		modelResponse = openscoring.deploy("Iris", pmmlBytes)
 		self.assertEqual("Iris", modelResponse.id)
 
@@ -48,13 +48,13 @@ class TestOpenscoring(TestCase):
 		self.assertEqual("Iris", modelResponse.id)
 
 		arguments = {
-			"Sepal_Length" : 5.1,
-			"Sepal_Width" : 3.5,
-			"Petal_Length" : 1.4,
-			"Petal_Width" : 0.2
+			"Sepal.Length" : 5.1,
+			"Sepal.Width" : 3.5,
+			"Petal.Length" : 1.4,
+			"Petal.Width" : 0.2
 		}
 		result = openscoring.evaluate("Iris", arguments)
-		self.assertEqual({"Species" : "setosa", "Probability_setosa" : 1.0, "Probability_versicolor" : 0.0, "Probability_virginica" : 0.0, "Node_Id" : "2"}, result)
+		self.assertEqual({"Species" : "setosa", "probability(setosa)" : 1.0, "probability(versicolor)" : 0.0, "probability(virginica)" : 0.0}, result)
 		evaluationRequest = EvaluationRequest("record-001", arguments)
 		evaluationResponse = openscoring.evaluate("Iris", evaluationRequest)
 		self.assertEqual(evaluationRequest.id, evaluationResponse.id)

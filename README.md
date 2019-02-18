@@ -34,10 +34,10 @@ os.deployFile("Iris", "DecisionTreeIris.pmml", **kwargs)
 Evaluating the `Iris` model with a data record:
 ```python
 arguments = {
-	"Sepal_Length" : 5.1,
-	"Sepal_Width" : 3.5,
-	"Petal_Length" : 1.4,
-	"Petal_Width" : 0.2
+	"Sepal.Length" : 5.1,
+	"Sepal.Width" : 3.5,
+	"Petal.Length" : 1.4,
+	"Petal.Width" : 0.2
 }
 
 result = os.evaluate("Iris", arguments)
@@ -73,7 +73,7 @@ pip uninstall openscoring
 
 # License #
 
-Openscoring-Python is dual-licensed under the [GNU Affero General Public License (AGPL) version 3.0](http://www.gnu.org/licenses/agpl-3.0.html), and a commercial license.
+Openscoring-Python is dual-licensed under the [GNU Affero General Public License (AGPL) version 3.0](https://www.gnu.org/licenses/agpl-3.0.html), and a commercial license.
 
 # Additional information #
 
