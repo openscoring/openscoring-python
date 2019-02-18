@@ -21,6 +21,15 @@ class EvaluationRequest(SimpleRequest):
 		self.id = id
 		self.arguments = arguments
 
+class BatchEvaluationRequest(SimpleRequest):
+
+	def __init__(self, id = None, requests = []):
+		for request in requests:
+			if not isinstance(request, EvaluationRequest):
+				raise ValueError("Request element is not EvaluationRequest")
+		self.id = id
+		self.requests = requests
+
 class SimpleResponse(object):
 
 	def __init__(self, message = None):
@@ -37,6 +46,14 @@ class EvaluationResponse(SimpleResponse):
 		super(EvaluationResponse, self).__init__(message)
 		self.id = id
 		self.result = result
+
+class BatchEvaluationResponse(SimpleResponse):
+
+	def __init__(self, message = None, id = None, responses = []):
+		super(BatchEvaluationResponse, self).__init__(message)
+		responses = [response if isinstance(response, EvaluationResponse) else EvaluationResponse(**response) for response in responses]
+		self.id = id
+		self.responses = responses
 
 class ModelResponse(SimpleResponse):
 
@@ -113,6 +130,22 @@ class Openscoring(object):
 			return evaluationResponse
 		else:
 			return evaluationResponse.result
+
+	def evaluateBatch(self, id, payload = [], **kwargs):
+		if isinstance(payload, BatchEvaluationRequest):
+			batchEvaluationRequest = payload
+		else:
+			evaluationRequests = [EvaluationRequest(None, arguments) for arguments in payload]
+			batchEvaluationRequest = BatchEvaluationRequest(None, evaluationRequests)
+		kwargs = _merge_dicts(kwargs, data = json.dumps(batchEvaluationRequest, cls = RequestEncoder), json = None, headers = {"content-type" : "application/json"})
+		response = self._check_response(requests.post(self._model_url(id) + "/batch", **kwargs))
+		batchEvaluationResponse = BatchEvaluationResponse(**json.loads(response.text))
+		batchEvaluationResponse.ensureSuccess()
+		if isinstance(payload, BatchEvaluationRequest):
+			return batchEvaluationResponse
+		else:
+			evaluationResponses = batchEvaluationResponse.responses
+			return [evaluationResponse.result for evaluationResponse in evaluationResponses]
 
 	def evaluateCsv(self, id, df, **kwargs):
 		csv = df.to_csv(None, sep = "\t", header = True, index = False, encoding = "UTF-8")
