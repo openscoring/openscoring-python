@@ -42,10 +42,10 @@ class SimpleResponse(object):
 
 class EvaluationResponse(SimpleResponse):
 
-	def __init__(self, message = None, id = None, result = {}):
+	def __init__(self, message = None, id = None, results = {}):
 		super(EvaluationResponse, self).__init__(message)
 		self.id = id
-		self.result = result
+		self.results = results
 
 class BatchEvaluationResponse(SimpleResponse):
 
@@ -100,11 +100,11 @@ class Openscoring(object):
 
 	def _check_response(self, response):
 		try:
-			service = response.headers["Service"]
-			if service.startswith("Openscoring/1.4") is False:
+			service = response.headers["X-Application"]
+			if service.startswith("Openscoring/2.0") is False:
 				raise ValueError(service)
 		except (KeyError, ValueError) as e:
-			raise ValueError("The web server at " + self.base_url + " did not identify itself as Openscoring/1.4 service")
+			raise ValueError("The web server at " + self.base_url + " did not identify itself as Openscoring/2.0 service")
 		return response
 
 	def deploy(self, id, pmml, **kwargs):
@@ -129,7 +129,7 @@ class Openscoring(object):
 		if isinstance(payload, EvaluationRequest):
 			return evaluationResponse
 		else:
-			return evaluationResponse.result
+			return evaluationResponse.results
 
 	def evaluateBatch(self, id, payload = [], **kwargs):
 		if isinstance(payload, BatchEvaluationRequest):
@@ -145,7 +145,7 @@ class Openscoring(object):
 			return batchEvaluationResponse
 		else:
 			evaluationResponses = batchEvaluationResponse.responses
-			return [evaluationResponse.result for evaluationResponse in evaluationResponses]
+			return [evaluationResponse.results for evaluationResponse in evaluationResponses]
 
 	def evaluateCsv(self, id, df, **kwargs):
 		csv = df.to_csv(None, sep = "\t", header = True, index = False, encoding = "UTF-8")

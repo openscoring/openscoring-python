@@ -53,12 +53,12 @@ class TestOpenscoring(TestCase):
 			"Petal.Length" : 1.4,
 			"Petal.Width" : 0.2
 		}
-		result = openscoring.evaluate("Iris", arguments)
-		self.assertEqual({"Species" : "setosa", "probability(setosa)" : 1.0, "probability(versicolor)" : 0.0, "probability(virginica)" : 0.0}, result)
+		results = openscoring.evaluate("Iris", arguments)
+		self.assertEqual({"Species" : "setosa", "probability(setosa)" : 1.0, "probability(versicolor)" : 0.0, "probability(virginica)" : 0.0}, results)
 		evaluationRequest = EvaluationRequest("record-001", arguments)
 		evaluationResponse = openscoring.evaluate("Iris", evaluationRequest)
 		self.assertEqual(evaluationRequest.id, evaluationResponse.id)
-		self.assertEqual("setosa", evaluationResponse.result["Species"])
+		self.assertEqual("setosa", evaluationResponse.results["Species"])
 
 		batchArguments = [
 			{
@@ -74,29 +74,29 @@ class TestOpenscoring(TestCase):
 				"Petal.Width" : 2.5
 			}
 		]
-		result = openscoring.evaluateBatch("Iris", batchArguments)
-		self.assertEquals(3, len(result))
-		self.assertEquals({"Species" : "setosa", "probability(setosa)" : 1.0, "probability(versicolor)" : 0.0, "probability(virginica)" : 0.0}, result[0])
-		self.assertEquals({"Species" : "versicolor", "probability(setosa)" : 0.0, "probability(versicolor)" : (49.0 / 54.0), "probability(virginica)" : (5.0 / 54.0)}, result[1])
-		self.assertEquals({"Species" : "virginica", "probability(setosa)" : 0.0, "probability(versicolor)" : (1.0 / 46.0), "probability(virginica)" : (45.0 / 46.0)}, result[2])
+		batchResults = openscoring.evaluateBatch("Iris", batchArguments)
+		self.assertEquals(3, len(batchResults))
+		self.assertEquals({"Species" : "setosa", "probability(setosa)" : 1.0, "probability(versicolor)" : 0.0, "probability(virginica)" : 0.0}, batchResults[0])
+		self.assertEquals({"Species" : "versicolor", "probability(setosa)" : 0.0, "probability(versicolor)" : (49.0 / 54.0), "probability(virginica)" : (5.0 / 54.0)}, batchResults[1])
+		self.assertEquals({"Species" : "virginica", "probability(setosa)" : 0.0, "probability(versicolor)" : (1.0 / 46.0), "probability(virginica)" : (45.0 / 46.0)}, batchResults[2])
 		evaluationRequests = [EvaluationRequest(None, arguments) for arguments in batchArguments]
 		batchEvaluationRequest = BatchEvaluationRequest("batch-A", evaluationRequests)
 		batchEvaluationResponse = openscoring.evaluateBatch("Iris", batchEvaluationRequest)
 		self.assertEqual(batchEvaluationRequest.id, batchEvaluationResponse.id)
 		evaluationResponses = batchEvaluationResponse.responses
 		self.assertEqual(3, len(evaluationResponses))
-		self.assertEqual("setosa", evaluationResponses[0].result["Species"])
-		self.assertEqual("versicolor", evaluationResponses[1].result["Species"])
-		self.assertEqual("virginica", evaluationResponses[2].result["Species"])
+		self.assertEqual("setosa", evaluationResponses[0].results["Species"])
+		self.assertEqual("versicolor", evaluationResponses[1].results["Species"])
+		self.assertEqual("virginica", evaluationResponses[2].results["Species"])
 
 		inCsv = os.path.join(os.path.dirname(__file__), "resources", "input.csv")
 		outCsv = os.path.join(tempfile.gettempdir(), "output.csv")
 
-		df = pandas.read_csv(inCsv, sep = ",")
-
-		result = openscoring.evaluateCsv("Iris", df)
-		self.assertEqual(df["Id"].tolist(), result["Id"].tolist())
-		self.assertEqual(["setosa", "versicolor", "virginica"], result["Species"].tolist())
+		dfArguments = pandas.read_csv(inCsv, sep = ",")
+		dfResults = openscoring.evaluateCsv("Iris", dfArguments)
+		self.assertEqual((3, 1 + 4), dfResults.shape)
+		self.assertEqual(dfArguments["Id"].tolist(), dfResults["Id"].tolist())
+		self.assertEqual(["setosa", "versicolor", "virginica"], dfResults["Species"].tolist())
 
 		self.assertFalse(os.path.isfile(outCsv))
 		openscoring.evaluateCsvFile("Iris", inCsv, outCsv)

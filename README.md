@@ -40,8 +40,8 @@ arguments = {
 	"Petal.Width" : 0.2
 }
 
-result = os.evaluate("Iris", arguments)
-print(result)
+results = os.evaluate("Iris", arguments)
+print(results)
 ```
 
 The same, but wrapping the data record into an `EvaluationRequest` object for request identification purposes:
@@ -51,7 +51,7 @@ from openscoring import EvaluationRequest
 evaluationRequest = EvaluationRequest("record-001", arguments)
 
 evaluationResponse = os.evaluate("Iris", evaluationRequest)
-print(evaluationResponse.result)
+print(evaluationResponse.results)
 ```
 
 Evaluating the `Iris` model with data records from the `Iris.csv` CSV file, storing the results to the `Iris-results` CSV file:
