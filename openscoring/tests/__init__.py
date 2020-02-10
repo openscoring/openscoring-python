@@ -108,4 +108,4 @@ class TestOpenscoring(TestCase):
 
 		with self.assertRaises(Exception) as context:
 			openscoring.evaluate("Iris", arguments)
-		self.assertEqual("Model \"Iris\" not found", str(context.exception))
+		self.assertEqual("Not Found", str(context.exception))
