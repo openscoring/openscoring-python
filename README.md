@@ -20,7 +20,7 @@ Creating an `Openscoring` object:
 ```python
 from openscoring import Openscoring
 
-os = Openscoring("http://localhost:8080/openscoring")
+os = Openscoring(base_url = "http://localhost:8080/openscoring")
 ```
 
 Deploying a PMML document `DecisionTreeIris.pmml` as an `Iris` model:

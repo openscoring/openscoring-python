@@ -33,7 +33,7 @@ class TestMergeDicts(TestCase):
 class TestOpenscoring(TestCase):
 
 	def testReadme(self):
-		openscoring = Openscoring(token = os.getenv("OPENSCORING_TOKEN", None))
+		openscoring = Openscoring(base_url = "http://localhost:8080/openscoring", token = os.getenv("OPENSCORING_TOKEN", None))
 
 		pmml = os.path.join(os.path.dirname(__file__), "resources", "DecisionTreeIris.pmml")
 

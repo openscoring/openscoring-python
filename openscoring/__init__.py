@@ -50,7 +50,7 @@ def _merge_dicts(user_dict, **system_dict):
 
 class Openscoring(object):
 
-	def __init__(self, base_url = "http://localhost:8080/openscoring", token = None):
+	def __init__(self, base_url, token = None):
 		self.base_url = base_url
 		self.auth = None
 		if token is not None:
