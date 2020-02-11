@@ -1,3 +1,4 @@
+from requests.auth import AuthBase
 from json import JSONDecoder, JSONEncoder
 
 try:
@@ -21,6 +22,15 @@ class RequestEncoder(JSONEncoder):
 		else:
 			return JSONEncoder.default(self, request)
 
+class BearerTokenAuth(AuthBase):
+
+	def __init__(self, token):
+		self.token = token
+
+	def __call__(self, request):
+		request.headers["authorization"] = "Bearer {}".format(self.token)
+		return request
+
 def _merge_dicts(user_dict, **system_dict):
 	if user_dict is None:
 		return system_dict
@@ -40,11 +50,14 @@ def _merge_dicts(user_dict, **system_dict):
 
 class Openscoring(object):
 
-	def __init__(self, base_url = "http://localhost:8080/openscoring"):
+	def __init__(self, base_url = "http://localhost:8080/openscoring", token = None):
 		self.base_url = base_url
+		self.auth = None
+		if token is not None:
+			self.auth = BearerTokenAuth(token)
 
 	def _model_url(self, id):
-		return self.base_url + "/model/" + id
+		return "{}/model/{}".format(self.base_url, id)
 
 	def _check_response(self, response):
 		try:
@@ -52,11 +65,11 @@ class Openscoring(object):
 			if service.startswith("Openscoring/2.0") is False:
 				raise ValueError(service)
 		except (KeyError, ValueError) as e:
-			raise ValueError("The web server at " + self.base_url + " did not identify itself as Openscoring/2.0 service")
+			raise ValueError("The web server at {} did not identify itself as Openscoring/2.0 service".format(self.base_url))
 		return response
 
 	def deploy(self, id, pmml, **kwargs):
-		kwargs = _merge_dicts(kwargs, data = pmml, json = None, headers = {"content-type" : "application/xml"})
+		kwargs = _merge_dicts(kwargs, data = pmml, json = None, auth = self.auth, headers = {"content-type" : "application/xml"})
 		response = self._check_response(requests.put(self._model_url(id), **kwargs))
 		modelResponse = ModelResponse(**json.loads(response.text))
 		return modelResponse.ensureSuccess()
@@ -70,7 +83,7 @@ class Openscoring(object):
 			evaluationRequest = payload
 		else:
 			evaluationRequest = EvaluationRequest(None, payload)
-		kwargs = _merge_dicts(kwargs, data = json.dumps(evaluationRequest, cls = RequestEncoder), json = None, headers = {"content-type" : "application/json"})
+		kwargs = _merge_dicts(kwargs, data = json.dumps(evaluationRequest, cls = RequestEncoder), json = None, auth = self.auth, headers = {"content-type" : "application/json"})
 		response = self._check_response(requests.post(self._model_url(id), **kwargs))
 		evaluationResponse = EvaluationResponse(**json.loads(response.text))
 		evaluationResponse.ensureSuccess()
@@ -85,7 +98,7 @@ class Openscoring(object):
 		else:
 			evaluationRequests = [EvaluationRequest(None, arguments) for arguments in payload]
 			batchEvaluationRequest = BatchEvaluationRequest(None, evaluationRequests)
-		kwargs = _merge_dicts(kwargs, data = json.dumps(batchEvaluationRequest, cls = RequestEncoder), json = None, headers = {"content-type" : "application/json"})
+		kwargs = _merge_dicts(kwargs, data = json.dumps(batchEvaluationRequest, cls = RequestEncoder), json = None, auth = self.auth, headers = {"content-type" : "application/json"})
 		response = self._check_response(requests.post(self._model_url(id) + "/batch", **kwargs))
 		batchEvaluationResponse = BatchEvaluationResponse(**json.loads(response.text))
 		batchEvaluationResponse.ensureSuccess()
@@ -97,7 +110,7 @@ class Openscoring(object):
 
 	def evaluateCsv(self, id, df, **kwargs):
 		csv = df.to_csv(None, sep = "\t", header = True, index = False, encoding = "UTF-8")
-		kwargs = _merge_dicts(kwargs, data = csv, json = None, headers = {"content-type" : "text/plain"}, params = {"delimiterChar" : "\t", "quoteChar" : "\""}, stream = False)
+		kwargs = _merge_dicts(kwargs, data = csv, json = None, auth = self.auth, headers = {"content-type" : "text/plain"}, params = {"delimiterChar" : "\t", "quoteChar" : "\""}, stream = False)
 		response = self._check_response(requests.post(self._model_url(id) + "/csv", **kwargs))
 		try:
 			if "content-encoding" in response.headers:
@@ -111,7 +124,7 @@ class Openscoring(object):
 
 	def evaluateCsvFile(self, id, infile, outfile, **kwargs): 
 		with open(infile, "rb") as instream:
-			kwargs = _merge_dicts(kwargs, data = instream, json = None, headers = {"content-type" : "text/plain"}, stream = True)
+			kwargs = _merge_dicts(kwargs, data = instream, json = None, auth = self.auth, headers = {"content-type" : "text/plain"}, stream = True)
 			response = self._check_response(requests.post(self._model_url(id) + "/csv", **kwargs))
 			try:
 				if "content-encoding" in response.headers:
@@ -125,6 +138,7 @@ class Openscoring(object):
 				response.close()
 
 	def undeploy(self, id, **kwargs):
+		kwargs = _merge_dicts(kwargs, auth = self.auth)
 		response = self._check_response(requests.delete(self._model_url(id), **kwargs))
 		simpleResponse = SimpleResponse(**json.loads(response.text))
 		return simpleResponse.ensureSuccess()
