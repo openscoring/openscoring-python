@@ -37,7 +37,7 @@ class SimpleResponse(object):
 
 	def ensureSuccess(self):
 		if hasattr(self, "message") and self.message is not None:
-			raise Exception(self.message)
+			raise ValueError(self.message)
 		return self
 
 class EvaluationResponse(SimpleResponse):
@@ -85,7 +85,7 @@ def _merge_dicts(user_dict, **system_dict):
 			elif user_value == system_value:
 				pass
 			else:
-				raise Exception()
+				raise ValueError("Key {} has differing values {} and {}".format(key, user_value, system_value))
 		else:
 			user_dict[key] = system_value
 	return user_dict

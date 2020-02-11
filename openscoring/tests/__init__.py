@@ -20,7 +20,7 @@ class TestMergeDicts(TestCase):
 		self.assertEqual({"A" : 1}, _merge_dicts({"A" : 1}, A = 1))
 
 	def testMergeValueConflict(self):
-		with self.assertRaises(Exception):
+		with self.assertRaises(ValueError):
 			_merge_dicts({"A" : 1}, A = "1")
 
 	def testMergeDict(self):
