@@ -21,7 +21,6 @@ Alternatively, installing the latest snapshot version from GitHub:
 pip install --upgrade git+https://github.com/openscoring/openscoring-python.git
 ```
 
-
 # Usage #
 
 Creating an `Openscoring` object:
@@ -33,10 +32,7 @@ os = Openscoring(base_url = "http://localhost:8080/openscoring")
 
 Deploying a PMML document `DecisionTreeIris.pmml` as an `Iris` model:
 ```python
-# A dictionary of user-specified parameters
-kwargs = {"auth" : ("admin", "adminadmin")}
-
-os.deployFile("Iris", "DecisionTreeIris.pmml", **kwargs)
+os.deployFile("Iris", "DecisionTreeIris.pmml")
 ```
 
 Evaluating the `Iris` model with a data record:
@@ -69,7 +65,7 @@ os.evaluateCsvFile("Iris", "Iris.csv", "Iris-results.csv")
 
 Undeploying the `Iris` model:
 ```python
-os.undeploy("Iris", **kwargs)
+os.undeploy("Iris")
 ```
 
 # De-installation #
