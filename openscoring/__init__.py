@@ -62,7 +62,7 @@ class Openscoring(object):
 	def _check_response(self, response):
 		try:
 			service = response.headers["X-Application"]
-			if service.startswith("Openscoring/2.0") is False:
+			if (service.startswith("Openscoring/2.0") or service.startswith("Openscoring/2.1")) is False:
 				raise ValueError(service)
 		except (KeyError, ValueError) as e:
 			raise ValueError("The web server at {} did not identify itself as Openscoring/2.0 service".format(self.base_url))
