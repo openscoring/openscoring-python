@@ -62,10 +62,10 @@ class Openscoring(object):
 	def _check_response(self, response):
 		try:
 			service = response.headers["X-Application"]
-			if (service.startswith("Openscoring/2.0") or service.startswith("Openscoring/2.1")) is False:
+			if (service.startswith("Openscoring/2.0") or service.startswith("Openscoring/2.1") or service.startswith("Openscoring/2.2")) is False:
 				raise ValueError(service)
 		except (KeyError, ValueError) as e:
-			raise ValueError("The web server at {} did not identify itself as Openscoring/2.0 service".format(self.base_url))
+			raise ValueError("The web server at {} did not identify itself as Openscoring/2.X service".format(self.base_url))
 		return response
 
 	def deploy(self, id, pmml, **kwargs):
