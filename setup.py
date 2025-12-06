@@ -1,4 +1,4 @@
-from distutils.core import setup
+from setuptools import find_packages, setup
 
 exec(open("openscoring/metadata.py").read())
 
@@ -20,9 +20,10 @@ setup(
 		"Topic :: Software Development",
 		"Topic :: Scientific/Engineering"
 	],
-	packages = [
-		"openscoring"
-	],
+	packages = find_packages(exclude = ["*.tests.*", "*.tests"]),
+	exclude_package_data = {
+		"" : ["README.md"],
+	},
 	install_requires = [
 		"pandas",
 		"requests>=2.10.0"
